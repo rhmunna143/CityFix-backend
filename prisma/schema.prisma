@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CITIZEN
+  STAFF
+  ADMIN
+}
+
+enum ComplaintStatus {
+  SUBMITTED
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REOPENED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentPurpose {
+  PRIORITY_FEE
+  SERVICE_CHARGE
+}
+
+enum NotificationType {
+  STATUS_UPDATE
+  ASSIGNMENT
+  SLA_BREACH
+  PAYMENT
+  FEEDBACK_REQUEST
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+  ASSIGN
+  ROLE_CHANGE
+  PAYMENT
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String?
+  googleId     String?   @unique
+  role         Role      @default(CITIZEN)
+  phone        String?
+  avatarUrl    String?
+  isActive     Boolean   @default(true)
+  isSuperAdmin Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  staffProfile    StaffProfile?
+  complaints      Complaint[]     @relation("UserComplaints")
+  refreshTokens   RefreshToken[]
+  notifications   Notification[]
+  payments        Payment[]
+  feedbacks       Feedback[]
+  auditLogs       AuditLog[]      @relation("ActorAuditLogs")
+  statusHistories StatusHistory[] @relation("ChangedByStatusHistory")
+  assignments     Assignment[]    @relation("AssignedByAssignment")
+  assignedTo      Assignment[]    @relation("StaffAssignment")
+  attachments     Attachment[]    @relation("UploadedByAttachment")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Department {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  staffProfiles StaffProfile[]
+  categories    Category[]
+  complaints    Complaint[]
+}
+
+model StaffProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  departmentId     String
+  isDepartmentLead Boolean  @default(false)
+  employeeCode     String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+}
+
+model Category {
+  id           String    @id @default(uuid())
+  name         String    @unique
+  description  String?
+  departmentId String
+  slaHours     Int
+  isChargeable Boolean   @default(false)
+  basePrice    Decimal?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  department Department  @relation(fields: [departmentId], references: [id])
+  complaints Complaint[]
+}
+
+model Complaint {
+  id             String          @id @default(uuid())
+  referenceCode  String          @unique
+  citizenId      String
+  categoryId     String
+  departmentId   String
+  title          String
+  description    String
+  latitude       Float
+  longitude      Float
+  address        String?
+  status         ComplaintStatus @default(SUBMITTED)
+  isPriority     Boolean         @default(false)
+  slaDeadline    DateTime
+  isSlaBreached  Boolean         @default(false)
+  resolutionNote String?
+  reopenCount    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+
+  citizen         User            @relation("UserComplaints", fields: [citizenId], references: [id])
+  category        Category        @relation(fields: [categoryId], references: [id])
+  department      Department      @relation(fields: [departmentId], references: [id])
+  attachments     Attachment[]
+  assignments     Assignment[]
+  statusHistories StatusHistory[]
+  feedback        Feedback?
+  payments        Payment[]
+
+  @@index([departmentId])
+  @@index([status])
+  @@index([citizenId])
+  @@index([latitude, longitude])
+}
+
+model Assignment {
+  id           String    @id @default(uuid())
+  complaintId  String
+  staffId      String
+  assignedById String
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+  isCurrent    Boolean   @default(true)
+
+  complaint  Complaint @relation(fields: [complaintId], references: [id])
+  staff      User      @relation("StaffAssignment", fields: [staffId], references: [id])
+  assignedBy User      @relation("AssignedByAssignment", fields: [assignedById], references: [id])
+}
+
+model StatusHistory {
+  id          String           @id @default(uuid())
+  complaintId String
+  fromStatus  ComplaintStatus?
+  toStatus    ComplaintStatus
+  changedById String
+  note        String?
+  createdAt   DateTime         @default(now())
+
+  complaint Complaint @relation(fields: [complaintId], references: [id])
+  changedBy User      @relation("ChangedByStatusHistory", fields: [changedById], references: [id])
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  complaintId  String
+  uploadedById String
+  url          String
+  publicId     String
+  fileType     String // IMAGE or DOCUMENT
+  stage        String // SUBMISSION or RESOLUTION
+  createdAt    DateTime @default(now())
+
+  complaint  Complaint @relation(fields: [complaintId], references: [id])
+  uploadedBy User      @relation("UploadedByAttachment", fields: [uploadedById], references: [id])
+}
+
+model Feedback {
+  id          String   @id @default(uuid())
+  complaintId String   @unique
+  citizenId   String
+  rating      Int // 1-5
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  complaint Complaint @relation(fields: [complaintId], references: [id])
+  citizen   User      @relation(fields: [citizenId], references: [id])
+}
+
+model Payment {
+  id                    String         @id @default(uuid())
+  userId                String
+  complaintId           String?
+  purpose               PaymentPurpose
+  amount                Decimal
+  currency              String         @default("usd")
+  stripeSessionId       String         @unique
+  stripePaymentIntentId String?
+  status                PaymentStatus  @default(PENDING)
+  paidAt                DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+  complaint Complaint? @relation(fields: [complaintId], references: [id])
+}
+
+model Notification {
+  id                 String           @id @default(uuid())
+  userId             String
+  type               NotificationType
+  title              String
+  body               String
+  isRead             Boolean          @default(false)
+  relatedComplaintId String?
+  createdAt          DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  actorId    String?
+  action     AuditAction
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  createdAt  DateTime    @default(now())
+
+  actor User? @relation("ActorAuditLogs", fields: [actorId], references: [id])
+}
