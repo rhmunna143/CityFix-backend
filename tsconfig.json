@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "moduleResolution": "nodenext",
     "resolveJsonModule": true,
-    "ignoreDeprecations": "6.0"
+    "typeRoots": ["./node_modules/@types", "./src/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
