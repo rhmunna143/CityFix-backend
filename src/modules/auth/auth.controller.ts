@@ -3,6 +3,7 @@ import { catchAsync } from '../../shared/catchAsync';
 import { sendResponse } from '../../shared/sendResponse';
 import { AuthService } from './auth.service';
 import { env } from '../../config/env';
+import ms from 'ms';
 
 const setTokenCookies = (res: Response, accessToken: string, refreshToken: string) => {
   const isProd = env.NODE_ENV === 'production';
@@ -11,14 +12,14 @@ const setTokenCookies = (res: Response, accessToken: string, refreshToken: strin
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
-    maxAge: 15 * 60 * 1000, // 15 mins (match with env)
+    maxAge: ms(env.JWT_ACCESS_EXPIRES_IN as string), 
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: ms(env.JWT_REFRESH_EXPIRES_IN as string),
   });
 };
 

@@ -13,11 +13,14 @@ router.use(authenticate);
 
 // Profile routes
 router.get('/me', UsersController.getMyProfile);
+
 router.put('/me', validateRequest(schemas.updateProfileSchema), UsersController.updateMyProfile);
+
 router.patch('/me/avatar', fileUpload.single('file'), UsersController.updateAvatar);
 
 // Admin only routes
 router.get('/', authorize(Role.ADMIN), UsersController.getAllUsers);
+
 router.get('/:id', authorize(Role.ADMIN), UsersController.getUserById);
 
 // Super admin only routes
@@ -27,6 +30,7 @@ router.patch(
   validateRequest(schemas.changeRoleSchema),
   UsersController.changeRole
 );
+
 router.delete('/:id', authorizeSuperAdmin, UsersController.deleteUser);
 
 export const UsersRoutes = router;

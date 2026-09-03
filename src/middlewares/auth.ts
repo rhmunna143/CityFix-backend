@@ -10,6 +10,7 @@ export const authenticate = catchAsync(async (req: Request, res: Response, next:
   let token = req.cookies?.accessToken;
 
   const authHeader = req.headers.authorization;
+  
   if (authHeader && authHeader.startsWith('Bearer ')) {
     token = authHeader.split(' ')[1];
   }
@@ -18,24 +19,27 @@ export const authenticate = catchAsync(async (req: Request, res: Response, next:
     throw new AppError(401, 'You are not logged in. Please log in to get access.');
   }
 
-  const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
-
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId },
-  });
-
-  if (!user || !user.isActive) {
-    throw new AppError(401, 'The user belonging to this token no longer exists or is inactive.');
+  try {
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+    
+    if (!user || !user.isActive) {
+      throw new AppError(401, 'The user belonging to this token no longer exists or is inactive.');
+    }
+    
+    req.user = {
+      id: user.id,
+      role: user.role,
+      email: user.email,
+      isSuperAdmin: user.isSuperAdmin,
+    };
+    next();
+  } catch (err: any) {
+    if (err instanceof AppError) throw err;
+    throw err; // Let global error handler catch TokenExpiredError
   }
-
-  req.user = {
-    id: user.id,
-    role: user.role,
-    email: user.email,
-    isSuperAdmin: user.isSuperAdmin,
-  };
-
-  next();
 });
 
 export const authorize = (...roles: Role[]) => {

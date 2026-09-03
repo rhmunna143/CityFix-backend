@@ -7,6 +7,7 @@ import { uploadToCloudinary } from '../../config/cloudinary';
 
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await UsersService.getMyProfile(req.user!.id);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -17,6 +18,7 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 
 const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await UsersService.updateMyProfile(req.user!.id, req.body);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -43,6 +45,7 @@ const updateAvatar = catchAsync(async (req: Request, res: Response) => {
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const result = await UsersService.getAllUsers(req.query);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -54,6 +57,7 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 
 const getUserById = catchAsync(async (req: Request, res: Response) => {
   const result = await UsersService.getUserById(req.params.id as string);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -64,6 +68,7 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 
 const changeRole = catchAsync(async (req: Request, res: Response) => {
   const result = await UsersService.changeRole(req.params.id as string, req.body);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -74,6 +79,7 @@ const changeRole = catchAsync(async (req: Request, res: Response) => {
 
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
   await UsersService.deleteUser(req.params.id as string);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
