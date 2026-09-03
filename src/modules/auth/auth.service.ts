@@ -138,6 +138,7 @@ const refreshToken = async (payload: IRefreshTokenPayload) => {
   }
 
   let decoded;
+
   try {
     decoded = jwt.verify(payload.refreshToken, env.JWT_REFRESH_SECRET) as jwt.JwtPayload;
   } catch (error) {
@@ -153,6 +154,7 @@ const refreshToken = async (payload: IRefreshTokenPayload) => {
   }
 
   const tokens = generateTokens(user);
+
   return { tokens };
 };
 
@@ -166,6 +168,7 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
   }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
   await redis.set(`pwd_reset_otp:${payload.email}`, otp, 'EX', 10 * 60);
 
   // TODO: Send email with OTP (mocked for now)
@@ -192,6 +195,7 @@ const resetPassword = async (payload: IResetPasswordPayload) => {
   }
 
   const hashedPassword = await bcrypt.hash(payload.newPassword, 12);
+  
   await prisma.user.update({
     where: { email: payload.email },
     data: { password: hashedPassword },

@@ -25,7 +25,7 @@ export const googleSchema = z.object({
 export const refreshTokenSchema = z.object({
   body: z.object({
     refreshToken: z.string().optional(),
-  }),
+  }).optional().default({}),
 });
 
 export const forgotPasswordSchema = z.object({

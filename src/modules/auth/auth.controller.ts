@@ -24,6 +24,7 @@ const setTokenCookies = (res: Response, accessToken: string, refreshToken: strin
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.register(req.body);
+
   setTokenCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
   
   sendResponse(res, {
@@ -36,6 +37,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
 
 const login = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.login(req.body);
+
   setTokenCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
 
   sendResponse(res, {
@@ -48,6 +50,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
 
 const googleLogin = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.googleLogin(req.body);
+
   setTokenCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
 
   sendResponse(res, {
@@ -59,8 +62,10 @@ const googleLogin = catchAsync(async (req: Request, res: Response) => {
 });
 
 const refreshToken = catchAsync(async (req: Request, res: Response) => {
-  const token = req.cookies.refreshToken || req.body.refreshToken;
+  const token = req.cookies.refreshToken || req.body?.refreshToken;
+
   const result = await AuthService.refreshToken({ refreshToken: token });
+
   setTokenCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
 
   sendResponse(res, {
@@ -73,6 +78,7 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
 
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.forgotPassword(req.body);
+  
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -83,6 +89,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 
 const verifyOtp = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.verifyOtp(req.body);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -93,6 +100,7 @@ const verifyOtp = catchAsync(async (req: Request, res: Response) => {
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.resetPassword(req.body);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -104,6 +112,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 const logout = catchAsync(async (req: Request, res: Response) => {
   // In a real app we might invalidate the token in Redis here
   const isProd = env.NODE_ENV === 'production';
+
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
@@ -111,6 +120,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
   };
 
   res.clearCookie('accessToken', cookieOptions);
+  
   res.clearCookie('refreshToken', cookieOptions);
 
   sendResponse(res, {
