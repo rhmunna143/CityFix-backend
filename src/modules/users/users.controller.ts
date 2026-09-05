@@ -32,7 +32,12 @@ const updateAvatar = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(400, 'No file uploaded');
   }
 
-  const avatarUrl = await uploadToCloudinary(req.file, 'avatars');
+  let avatarUrl: string = '';
+  if (req.file) {
+    const { secure_url } = await uploadToCloudinary(req.file, 'avatars');
+    avatarUrl = secure_url;
+  }
+  
   const result = await UsersService.updateAvatar(req.user!.id, avatarUrl);
 
   sendResponse(res, {

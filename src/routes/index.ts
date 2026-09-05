@@ -4,6 +4,11 @@ import { UsersRoutes } from '../modules/users/users.route';
 import { DepartmentRoutes } from '../modules/departments/department.route';
 import { CategoryRoutes } from '../modules/categories/category.route';
 import { ComplaintRoutes } from '../modules/complaints/complaint.route';
+import { AuditLogRoutes } from '../modules/auditLogs/auditLog.route';
+import { NotificationRoutes } from '../modules/notifications/notification.route';
+import { AssignmentRoutes } from '../modules/assignments/assignment.route';
+import { AttachmentRoutes } from '../modules/attachments/attachment.route';
+import { FeedbackRoutes } from '../modules/feedback/feedback.route';
 
 const router = Router();
 
@@ -27,6 +32,26 @@ const moduleRoutes = [
   {
     path: '/complaints',
     route: ComplaintRoutes,
+  },
+  {
+    path: '/audit-logs',
+    route: AuditLogRoutes,
+  },
+  {
+    path: '/notifications',
+    route: NotificationRoutes,
+  },
+  {
+    path: '/',
+    route: AssignmentRoutes,
+  },
+  {
+    path: '/',
+    route: AttachmentRoutes,
+  },
+  {
+    path: '/',
+    route: FeedbackRoutes,
   },
 ];
 
