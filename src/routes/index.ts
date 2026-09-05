@@ -9,6 +9,7 @@ import { NotificationRoutes } from '../modules/notifications/notification.route'
 import { AssignmentRoutes } from '../modules/assignments/assignment.route';
 import { AttachmentRoutes } from '../modules/attachments/attachment.route';
 import { FeedbackRoutes } from '../modules/feedback/feedback.route';
+import { PaymentRoutes } from '../modules/payments/payment.route';
 
 const router = Router();
 
@@ -52,6 +53,10 @@ const moduleRoutes = [
   {
     path: '/',
     route: FeedbackRoutes,
+  },
+  {
+    path: '/payments',
+    route: PaymentRoutes,
   },
 ];
 
