@@ -23,7 +23,6 @@ const createComplaint = async (citizenId: string, payload: ICreateComplaintPaylo
   }
 
   const referenceCode = await generateReferenceCode();
-
   // Calculate SLA deadline
   const slaDeadline = new Date();
   slaDeadline.setHours(slaDeadline.getHours() + category.slaHours);
