@@ -7,9 +7,12 @@ const app: Application = express();
 
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+// Stripe webhook needs raw body, so we conditionally apply express.json
+app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
+app.use(express.json());
 
 // Health check
 app.get('/', (req: Request, res: Response) => {

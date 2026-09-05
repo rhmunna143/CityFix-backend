@@ -2,7 +2,9 @@ import { prisma } from '../../config/db';
 import { AppError } from '../../shared/AppError';
 import { QueryBuilder } from '../../shared/queryBuilder';
 import { ICreateComplaintPayload, IUpdateComplaintStatusPayload } from './complaint.interface';
-import { ComplaintStatus, Role, Prisma } from '@prisma/client';
+import { ComplaintStatus, Role, Prisma, AuditAction, NotificationType } from '@prisma/client';
+import { AuditLogService } from '../auditLogs/auditLog.service';
+import { NotificationService } from '../notifications/notification.service';
 
 const generateReferenceCode = async () => {
   const year = new Date().getFullYear();
@@ -21,7 +23,6 @@ const createComplaint = async (citizenId: string, payload: ICreateComplaintPaylo
   }
 
   const referenceCode = await generateReferenceCode();
-  
   // Calculate SLA deadline
   const slaDeadline = new Date();
   slaDeadline.setHours(slaDeadline.getHours() + category.slaHours);
@@ -117,7 +118,7 @@ const getComplaintById = async (user: { id: string; role: Role }, id: string) =>
 const updateComplaintStatus = async (
   user: { id: string; role: Role },
   id: string,
-  payload: IUpdateComplaintStatusPayload
+  payload: IUpdateComplaintStatusPayload,
 ) => {
   const complaint = await prisma.complaint.findUnique({
     where: { id, deletedAt: null },
@@ -144,7 +145,10 @@ const updateComplaintStatus = async (
 
   const allowed = validTransitions[complaint.status] || [];
   if (!allowed.includes(payload.status)) {
-    throw new AppError(400, `Invalid status transition from ${complaint.status} to ${payload.status}`);
+    throw new AppError(
+      400,
+      `Invalid status transition from ${complaint.status} to ${payload.status}`,
+    );
   }
 
   const result = await prisma.$transaction(async (tx) => {
@@ -168,6 +172,23 @@ const updateComplaintStatus = async (
 
     return updated;
   });
+
+  await AuditLogService.logAction(
+    AuditAction.STATUS_CHANGE,
+    'Complaint',
+    id,
+    user.id,
+    { status: complaint.status },
+    { status: payload.status, resolutionNote: payload.resolutionNote },
+  );
+
+  await NotificationService.sendNotification(
+    complaint.citizenId,
+    NotificationType.STATUS_UPDATE,
+    'Complaint Status Updated',
+    `Your complaint ${complaint.referenceCode} status changed to ${payload.status}.`,
+    id,
+  );
 
   return result;
 };
@@ -207,6 +228,15 @@ const reopenComplaint = async (citizenId: string, id: string) => {
     return updated;
   });
 
+  await AuditLogService.logAction(
+    AuditAction.STATUS_CHANGE,
+    'Complaint',
+    id,
+    citizenId,
+    { status: complaint.status, reopenCount: complaint.reopenCount },
+    { status: ComplaintStatus.REOPENED, reopenCount: complaint.reopenCount + 1 },
+  );
+
   return result;
 };
 
@@ -228,6 +258,8 @@ const deleteComplaint = async (user: { id: string; role: Role }, id: string) => 
     where: { id },
     data: { deletedAt: new Date() },
   });
+
+  await AuditLogService.logAction(AuditAction.DELETE, 'Complaint', id, user.id);
 
   return null;
 };

@@ -1,5 +1,6 @@
 import app from './app';
 import { env } from './config/env';
+import { startSLACronJob } from './cron/slaCheck';
 
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
@@ -8,6 +9,8 @@ process.on('uncaughtException', (err) => {
 });
 
 const port = env.PORT || 5000;
+
+startSLACronJob();
 
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port} in ${env.NODE_ENV} mode.`);

@@ -41,7 +41,7 @@ const updateComplaintStatus = catchAsync(async (req: Request, res: Response) => 
   const result = await ComplaintService.updateComplaintStatus(
     req.user!,
     req.params.id as string,
-    req.body
+    req.body,
   );
 
   sendResponse(res, {
@@ -87,7 +87,6 @@ const searchComplaints = catchAsync(async (req: Request, res: Response) => {
 
 const getMyAssigned = catchAsync(async (req: Request, res: Response) => {
   const result = await ComplaintService.getMyAssigned(req.user!.id);
-  
   sendResponse(res, {
     statusCode: 200,
     success: true,
