@@ -5,8 +5,13 @@ import cookieParser from 'cookie-parser';
 
 const app: Application = express();
 
+import { env } from './config/env';
+
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: env.CLIENT_URL,
+  credentials: true,
+}));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
