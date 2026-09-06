@@ -4,7 +4,7 @@ CityFix is a robust backend API for managing municipal service requests and comp
 
 ## 🚀 Live Links
 - **Live API Base URL**: [https://cityfix-backend-lime.vercel.app](https://cityfix-backend-lime.vercel.app)
-- **Postman Collection**: [View & Run Postman Collection](https://restless-space-585979.postman.co/workspace/My-Workspace~72196ab5-c6eb-4d40-822b-93b6c1904f36/collection/31457961-eefa1afc-6667-4960-923f-c68f20d7507e?action=share&creator=31457961&active-environment=31457961-c39462c3-ddc3-40ac-a468-2330298e9ca1)
+- **Postman Collection**: [View & Run Postman Collection](https://documenter.getpostman.com/view/31457961/2sBYAxNoWH)
 - **Video Walkthrough**: [Watch the video for the project Walkthrough](https://youtu.be/EK1uk7Hcv54)
 
 ---
