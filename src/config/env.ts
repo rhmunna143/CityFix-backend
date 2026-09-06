@@ -9,6 +9,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url().default('redis://localhost:6379'),
   CLIENT_URL: z.string().url().default('http://localhost:3000'),
+  PAYMENT_SUCCESS_URL: z.string().url().default('http://localhost:3000/payment/success'),
+  PAYMENT_FAILED_URL: z.string().url().default('http://localhost:3000/payment/failed'),
 
   JWT_ACCESS_SECRET: z.string().min(1),
   JWT_REFRESH_SECRET: z.string().min(1),

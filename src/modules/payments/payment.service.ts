@@ -66,8 +66,8 @@ const initiatePayment = async (userId: string, payload: IInitiatePaymentPayload)
       },
     ],
     mode: 'payment',
-    success_url: `http://localhost:${env.PORT}/success`,
-    cancel_url: `http://localhost:${env.PORT}/cancel`,
+    success_url: env.PAYMENT_SUCCESS_URL,
+    cancel_url: env.PAYMENT_FAILED_URL,
     metadata: {
       userId,
       complaintId: payload.complaintId,
