@@ -7,6 +7,7 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "deploy": "vercel --prod",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "db:migrate": "prisma migrate dev",
