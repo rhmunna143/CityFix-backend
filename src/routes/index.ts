@@ -10,6 +10,8 @@ import { AssignmentRoutes } from '../modules/assignments/assignment.route';
 import { AttachmentRoutes } from '../modules/attachments/attachment.route';
 import { FeedbackRoutes } from '../modules/feedback/feedback.route';
 import { PaymentRoutes } from '../modules/payments/payment.route';
+import { AdminRoutes } from '../modules/admin/admin.route';
+import { PublicRoutes } from '../modules/public/public.route';
 
 const router = Router();
 
@@ -57,6 +59,14 @@ const moduleRoutes = [
   {
     path: '/payments',
     route: PaymentRoutes,
+  },
+  {
+    path: '/admin',
+    route: AdminRoutes,
+  },
+  {
+    path: '/public',
+    route: PublicRoutes,
   },
 ];
 
