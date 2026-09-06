@@ -1,78 +1,73 @@
 # CityFix Backend - Video Walkthrough Script
 
 **Target Duration**: 5 - 10 minutes
-**Tools Needed**: Postman (with the provided collection), PgAdmin/DBeaver (to show DB), Redis CLI (optional), Stripe Dashboard.
+**Tools Needed**: Postman (using the live API), PgAdmin/DBeaver (to show DB), Stripe Dashboard.
 
 ---
 
-## 1. Introduction (0:00 - 1:00)
-- **Visuals**: Show the `README.md` and the running terminal (`npm run dev`).
+## 1. Project Overview & Architecture (0:00 - 1:00)
+- **Visuals**: Show the `README.md` and then briefly open a route, controller, and service file in your IDE.
 - **Script**: 
-  > "Hello, my name is [Your Name], and this is the video walkthrough for CityFix, a municipal service request and complaint management platform. 
+  > "Hello, my name is [Your Name]. This is the video walkthrough for **CityFix**, a municipal service request and complaint management platform. The platform solves the problem of tracking, routing, and fulfilling citizen complaints like road hazards or waste management issues.
   > 
-  > The CityFix API is built on a modern stack: Node.js, Express, TypeScript, Prisma with PostgreSQL, Redis, Stripe, and Cloudinary. The platform is fully deployed and running live on Vercel's serverless edge infrastructure.
-  > 
-  > Today, I'll walk you through the core architecture, demonstrate the role-based access control using our live Postman collection, run through the complaint lifecycle, and show you some of the advanced features like Stripe payments, Redis caching, and automated SLA tracking."
+  > The CityFix API is built on a modern stack: Node.js, Express, TypeScript, Prisma with PostgreSQL, Redis, Stripe, and Cloudinary. Our architecture strictly follows the Controller-Service pattern. Requests hit our **Routes** where they pass through authentication and Zod validation, move to the **Controllers** which handle HTTP responses, and then drop into our **Services** which encapsulate the core business logic and interface with the database via **Prisma**."
 
-## 2. Authentication & Roles (1:00 - 2:00)
-- **Visuals**: Open Postman. Show the Auth folder.
+## 2. Authentication, Roles, & RBAC (1:00 - 2:00)
+- **Visuals**: Open Postman. Show the Auth and Admin folders.
 - **Action**:
   - Run the `login` endpoint as a **Citizen**. Show the JWT token being generated.
-  - Run the `login` endpoint as an **Admin**.
-  - Show the RBAC in action: Try to create a Category as a Citizen (expect 403 Forbidden). Then create a Category as an Admin (expect 201 Created).
+  - Using the Citizen token, attempt to hit the `GET /admin/users` endpoint or create a Category. (Show the `403 Forbidden` response).
+  - Now, login as an **Admin**, hit the exact same `GET /admin/users` endpoint, and show it succeeding (`200 OK`).
+  - Briefly show logging in as **Staff** to view assigned complaints.
 - **Script**:
-  > "We have exactly three strict roles: Citizen, Staff, and Admin. Authentication is handled via JWT access tokens and long-lived refresh tokens. 
+  > "We maintain three distinct roles: Citizen, Staff, and Admin. Authentication is handled via JWT access and refresh tokens. 
   > 
-  > Here, I'm logging in as a Citizen. If I attempt to access an Admin-only route, like creating a new Department or Category, the system's global RBAC middleware blocks the request. When I log in as an Admin, the exact same request succeeds."
+  > Here, I'm logging in as a Citizen. If I attempt to access an Admin-only route, like fetching all system users, the global Role-Based Access Control middleware blocks the request and returns a 403 Forbidden. However, when I authenticate as an Admin, the exact same request safely succeeds."
 
-## 3. The Complaint Lifecycle (2:00 - 4:00)
-- **Visuals**: Postman (Complaints, Assignments, Attachments).
+## 3. Validation & Error Handling (2:00 - 3:00)
+- **Visuals**: Postman.
 - **Action**:
-  1. **Citizen**: Submit a new complaint (e.g., Pothole repair). Show the response with the `SUBMITTED` status and `slaDeadline`.
-  2. **Citizen**: Upload a photo attachment to that complaint via Multer & Cloudinary (show the Cloudinary URL in the response).
-  3. **Admin/Staff Lead**: Assign the complaint to a specific Staff member. Show the transaction that creates the `Assignment`.
-  4. **Staff**: Update the complaint status to `IN_PROGRESS`, then to `RESOLVED` with a resolution note.
-  5. **Citizen**: Submit a 1-5 feedback rating on the `CLOSED` complaint.
+  - **400 Validation Error**: Attempt to register a new user or submit a complaint with a deliberately malformed email (e.g., `invalid-email`). Show the structured Zod error array in the response.
+  - **401 Unauthorized**: Attempt to access a protected route (like `GET /users/me`) with an expired or missing token.
+  - **404 Not Found**: Attempt to fetch a non-existent complaint ID.
 - **Script**:
-  > "Let's walk through the core workflow. A citizen submits a new request, which maps to a category and computes an SLA deadline. They can upload image evidence, which our API handles entirely in-memory using Multer and streams directly to Cloudinary for optimized storage.
+  > "Our API is heavily fortified against bad data. If a user submits a malformed payload—such as an invalid email address—our Zod validation middleware intercepts it and returns a structured 400 error detailing exactly which fields failed.
   > 
-  > Next, a Department Lead assigns the ticket to a technician. Our Prisma services ensure this happens atomically inside a transaction. The staff member updates the status to resolved, and finally, the citizen leaves a feedback rating."
+  > We also have standardized error handling across the board. Providing an invalid token yields a clear 401 Unauthorized, and attempting to access a resource that doesn't exist returns a unified 404 Not Found."
 
-## 4. Payments Integration (Stripe) (4:00 - 5:30)
-- **Visuals**: Postman (Payments), Stripe Dashboard.
-- **Action**: 
-  - Call `POST /payments/initiate` on a complaint to buy priority processing. Show the Stripe checkout URL.
-  - Show the `POST /payments/webhook` endpoint. Explain how it bypasses the global JSON parser to capture the raw body for cryptographic signature verification.
-- **Script**:
-  > "CityFix allows citizens to pay for premium services—like expedited processing—via Stripe. 
-  > 
-  > When a citizen initiates a payment, we generate a Stripe Checkout session. Crucially, our application listens to Stripe Webhooks. We use `express.raw` specifically on the webhook route to verify Stripe's cryptographic signatures securely. 
-  > 
-  > When Stripe fires the `checkout.session.completed` event, our backend automatically unlocks the complaint, applies the priority flag, and recalculates the SLA deadline—all inside a database transaction."
-
-## 5. Caching & Performance (Redis) (5:30 - 6:30)
-- **Visuals**: Postman (Public Stats, Admin Dashboard), code editor showing `src/middlewares/rateLimiter.ts`.
-- **Action**: 
-  - Hit `GET /public/stats` multiple times. Note the lightning-fast response time on subsequent requests.
-- **Script**:
-  > "To ensure performance under load, we heavily utilize Redis. Endpoints with heavy database aggregations, like the Public Stats and Admin Dashboards, are cached in Redis with short TTLs. 
-  > 
-  > Additionally, our API rate limiters are backed by Redis via `rate-limit-redis`, ensuring that brute-force protections on our auth routes are synchronized across horizontal server instances."
-
-## 6. Audit Logs, Soft Deletes & Security (6:30 - 8:00)
-- **Visuals**: Database GUI (PgAdmin/DBeaver) or Postman (Admin Audit Logs).
+## 4. Demonstrating CRUD (3:00 - 4:30)
+- **Visuals**: Postman (Complaints / Categories folders).
 - **Action**:
-  - Show a soft-deleted record in the database (`deletedAt` is populated, row isn't dropped).
-  - Run `GET /admin/audit-logs` in Postman. Show how state transitions and role changes are immutably tracked.
-  - Explain the SLA cron job in `src/cron/slaCheck.ts`.
+  - **CREATE (POST)**: Submit a new complaint as a citizen. Show the JSON body and response.
+  - **READ (GET)**: Fetch the paginated list of complaints.
+  - **UPDATE (PATCH)**: As an Admin, update the name or base price of a Category.
+  - **DELETE**: Delete a category or user. Show how the database performs a "Soft Delete" (populating `deletedAt` instead of dropping the row).
 - **Script**:
-  > "We maintain strict data integrity. Whenever a resource is deleted, we apply a soft delete by timestamping `deletedAt`, ensuring historical complaints never break.
+  > "Let's demonstrate the core CRUD functionality. A citizen can CREATE a new complaint by passing a JSON payload with a location and description. We can READ those complaints using our robust querying and pagination engine.
   > 
-  > We also run a centralized Audit Logger. Every state transition, payment, or role change writes an immutable JSON diff to our Audit Logs table, giving administrators full visibility.
-  > 
-  > Lastly, we have a `node-cron` background job running hourly. It scans the database for active assignments that have breached their computed SLA deadlines, automatically flagging them and firing notifications to department leads."
+  > Administrators can UPDATE system records—like modifying a category's base price via a PATCH request. Finally, when performing a DELETE operation, our system employs soft-deletes via Prisma extensions, ensuring data integrity by simply timestamping the record rather than destroying it."
 
-## 7. Conclusion (8:00 - 8:30)
+## 5. Payments Integration (Stripe) (4:30 - 6:00)
+- **Visuals**: Postman (Payments), Stripe Checkout URL, Stripe Dashboard.
+- **Action**: 
+  - Call `POST /payments/initiate` for a complaint to buy priority processing. Show the Stripe checkout URL.
+  - Open the Stripe URL in the browser and complete a mock payment.
+  - Back in Postman (or the database), show the `Payment` record status changed to `SUCCEEDED` and the complaint's `isPriority` flag updated to `true`.
+- **Script**:
+  > "CityFix allows citizens to pay for premium services, such as expedited priority processing, via Stripe. 
+  > 
+  > When a citizen initiates a payment, our API generates a Stripe Checkout session. Crucially, our backend listens for asynchronous Stripe Webhooks. When the user successfully checks out, Stripe sends a secure event to our webhook route. Our server verifies the cryptographic signature, then atomically updates the payment status to 'Succeeded' in the database and recalculates the citizen's SLA deadline."
+
+## 6. Technical Challenge (6:00 - 7:00)
+- **Visuals**: Code editor showing `src/app.ts` (Webhook raw parser) or `src/config/env.ts` (Vercel formatting).
+- **Script**:
+  > "One of the most significant technical challenges I faced was effectively parsing the Stripe Webhooks. 
+  > 
+  > Express applications typically use a global JSON parser. However, Stripe requires the absolute raw, unparsed byte stream of the incoming request to mathematically verify the cryptographic signature. If the JSON parser touches it first, the validation fails. 
+  > 
+  > I solved this by strategically mounting the webhook route with `express.raw()` at the very top of the application stack, strictly bypassing the global JSON middleware for that specific endpoint, ensuring our financial transactions are completely secure."
+
+## 7. Conclusion (7:00 - 7:30)
 - **Visuals**: Back to the GitHub repository / README.
 - **Script**:
-  > "That concludes the walkthrough of CityFix. The complete Postman collection, database schema, and deployment configurations are available in the repository. Thank you for watching!"
+  > "That concludes the walkthrough of CityFix. The complete Postman collection, deployed API, database schema, and source code are available in the repository. Thank you for watching!"
