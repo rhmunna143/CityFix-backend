@@ -3,11 +3,32 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const formatUrl = (v?: string, defaultUrl?: string) => {
+  if (!v || v.trim() === '') return defaultUrl!;
+  let url = v.trim();
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+  return url;
+};
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().default('3000'),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url().default('redis://localhost:6379'),
+  CLIENT_URL: z
+    .string()
+    .optional()
+    .transform((v) => formatUrl(v, 'http://localhost:3000')),
+  PAYMENT_SUCCESS_URL: z
+    .string()
+    .optional()
+    .transform((v) => formatUrl(v, 'http://localhost:3000/payment/success')),
+  PAYMENT_FAILED_URL: z
+    .string()
+    .optional()
+    .transform((v) => formatUrl(v, 'http://localhost:3000/payment/failed')),
 
   JWT_ACCESS_SECRET: z.string().min(1),
   JWT_REFRESH_SECRET: z.string().min(1),

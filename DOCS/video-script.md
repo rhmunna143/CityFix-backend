@@ -10,9 +10,9 @@
 - **Script**: 
   > "Hello, my name is [Your Name], and this is the video walkthrough for CityFix, a municipal service request and complaint management platform. 
   > 
-  > The CityFix API is built on a modern stack: Node.js, Express, TypeScript, Prisma with PostgreSQL, Redis, Stripe, and Cloudinary. 
+  > The CityFix API is built on a modern stack: Node.js, Express, TypeScript, Prisma with PostgreSQL, Redis, Stripe, and Cloudinary. The platform is fully deployed and running live on Vercel's serverless edge infrastructure.
   > 
-  > Today, I'll walk you through the core architecture, demonstrate the role-based access control, run through the complaint lifecycle, and show you some of the advanced features like Stripe payments, Redis caching, and automated SLA tracking."
+  > Today, I'll walk you through the core architecture, demonstrate the role-based access control using our live Postman collection, run through the complaint lifecycle, and show you some of the advanced features like Stripe payments, Redis caching, and automated SLA tracking."
 
 ## 2. Authentication & Roles (1:00 - 2:00)
 - **Visuals**: Open Postman. Show the Auth folder.
