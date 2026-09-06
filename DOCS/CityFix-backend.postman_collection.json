@@ -1,0 +1,642 @@
+{
+  "info": {
+    "name": "CityFix-backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "devBaseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Citizen\",\"email\":\"citizen@cityfix.local\",\"password\":\"securepassword123\",\"phone\":\"1234567890\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"citizen@cityfix.local\",\"password\":\"securepassword123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "google-login",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/google",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idToken\":\"abc\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "refresh-token",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/refresh-token",
+            "header": []
+          }
+        },
+        {
+          "name": "forgot-password",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/forgot-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"citizen@cityfix.local\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "verify-otp",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/verify-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"citizen@cityfix.local\",\"otp\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "reset-password",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"citizen@cityfix.local\",\"otp\":\"123456\",\"newPassword\":\"newpassword\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/auth/logout",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "get-me",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/users/me",
+            "header": []
+          }
+        },
+        {
+          "name": "update-me",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/users/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"New Name\",\"phone\":\"0987654321\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "update-avatar",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/users/me/avatar",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "change-password",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/users/change-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"oldPassword\":\"securepassword123\",\"newPassword\":\"newsecurepassword123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Departments",
+      "item": [
+        {
+          "name": "create-dept",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/departments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"New Dept\",\"description\":\"Test dept\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "get-depts",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/departments",
+            "header": []
+          }
+        },
+        {
+          "name": "update-dept",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/departments/:id",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Updated Dept\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "delete-dept",
+          "request": {
+            "method": "DELETE",
+            "url": "{{devBaseUrl}}/api/v1/departments/:id",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "create-cat",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/categories",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Pothole\",\"description\":\"Fix it\",\"slaHours\":48,\"departmentId\":\"<UUID>\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "get-cats",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/categories",
+            "header": []
+          }
+        },
+        {
+          "name": "update-cat",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/categories/:id",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"basePrice\":100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "delete-cat",
+          "request": {
+            "method": "DELETE",
+            "url": "{{devBaseUrl}}/api/v1/categories/:id",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Complaints",
+      "item": [
+        {
+          "name": "create-complaint",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"categoryId\":\"<UUID>\",\"title\":\"Pothole\",\"description\":\"Big pothole\",\"latitude\":12.3,\"longitude\":45.6,\"address\":\"Main st\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "get-complaints",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/complaints",
+            "header": []
+          }
+        },
+        {
+          "name": "get-single-complaint",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id",
+            "header": []
+          }
+        },
+        {
+          "name": "update-status",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"RESOLVED\",\"resolutionNote\":\"Fixed\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "reopen-complaint",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/reopen",
+            "header": []
+          }
+        },
+        {
+          "name": "delete-complaint",
+          "request": {
+            "method": "DELETE",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id",
+            "header": []
+          }
+        },
+        {
+          "name": "search-complaints",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/complaints/search?q=pothole",
+            "header": []
+          }
+        },
+        {
+          "name": "my-assigned-complaints",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/complaints/my-assigned",
+            "header": []
+          }
+        },
+        {
+          "name": "assign-complaint",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/assign",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"staffId\":\"<UUID>\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "reassign-complaint",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/assignments/:id/reassign",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"staffId\":\"<UUID>\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "item": [
+        {
+          "name": "upload-attachment",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/attachments",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "stage",
+                  "type": "text",
+                  "value": "SUBMISSION"
+                },
+                {
+                  "key": "fileType",
+                  "type": "text",
+                  "value": "IMAGE"
+                }
+              ]
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "delete-attachment",
+          "request": {
+            "method": "DELETE",
+            "url": "{{devBaseUrl}}/api/v1/attachments/:id",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "submit-feedback",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/feedback",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"rating\":5,\"comment\":\"Great job\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "get-feedback",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/complaints/:id/feedback",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "initiate-payment",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/payments/initiate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"complaintId\":\"<UUID>\",\"purpose\":\"PRIORITY_FEE\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "webhook",
+          "request": {
+            "method": "POST",
+            "url": "{{devBaseUrl}}/api/v1/payments/webhook",
+            "header": []
+          }
+        },
+        {
+          "name": "get-payment",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/payments/:id",
+            "header": []
+          }
+        },
+        {
+          "name": "my-payments",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/payments/my-history",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "get-notifications",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/notifications",
+            "header": []
+          }
+        },
+        {
+          "name": "mark-read",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/notifications/:id/read",
+            "header": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin & Stats",
+      "item": [
+        {
+          "name": "get-public-stats",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/public/stats",
+            "header": []
+          }
+        },
+        {
+          "name": "get-dashboard-stats",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/admin/dashboard-stats",
+            "header": []
+          }
+        },
+        {
+          "name": "get-audit-logs",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/admin/audit-logs",
+            "header": []
+          }
+        },
+        {
+          "name": "get-users",
+          "request": {
+            "method": "GET",
+            "url": "{{devBaseUrl}}/api/v1/admin/users",
+            "header": []
+          }
+        },
+        {
+          "name": "change-user-role",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/admin/users/:id/role",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\":\"STAFF\",\"departmentId\":\"<UUID>\",\"employeeCode\":\"EMP123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        },
+        {
+          "name": "deactivate-user",
+          "request": {
+            "method": "PATCH",
+            "url": "{{devBaseUrl}}/api/v1/admin/users/:id/deactivate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"isActive\":false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": []
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -455,7 +455,7 @@ _(45 documented endpoints — comfortably exceeds the 20-minimum and covers ever
 
 - `modules/admin`, `modules/auditLogs`, `GET /public/stats`, `GET /admin/dashboard-stats`.
 - Security pass: helmet, CORS allowlist, rate-limit tuning, final Zod validation audit.
-- Postman collection export, README, deploy to Render, connect production Postgres/Redis, record demo video.
+- Postman collection export, README, deploy to Vercel (create vercel.json file), connect production Postgres/Redis, record demo video.
 
 ---
 
