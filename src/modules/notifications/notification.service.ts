@@ -1,6 +1,7 @@
 import { prisma } from '../../config/db';
 import { NotificationType } from '@prisma/client';
 import { QueryBuilder } from '../../shared/queryBuilder';
+import { sendEmail } from '../../shared/sendEmail';
 
 const sendNotification = async (
   userId: string,
@@ -9,7 +10,7 @@ const sendNotification = async (
   body: string,
   relatedComplaintId?: string | null,
 ) => {
-  return prisma.notification.create({
+  const notif = await prisma.notification.create({
     data: {
       userId,
       type,
@@ -18,6 +19,20 @@ const sendNotification = async (
       relatedComplaintId,
     },
   });
+
+  // Fetch user to send email notification
+  prisma.user.findUnique({ where: { id: userId } }).then(user => {
+    if (user && user.email) {
+      sendEmail({
+        to: user.email,
+        subject: title,
+        text: body,
+        html: `<p>${body}</p>`,
+      }).catch(err => console.error('Failed to send notification email', err));
+    }
+  }).catch(err => console.error('Error fetching user for email notification', err));
+
+  return notif;
 };
 
 const getMyNotifications = async (userId: string, query: Record<string, any>) => {

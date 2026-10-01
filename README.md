@@ -34,6 +34,7 @@ Use the following credentials to test the role-based access control (RBAC) acros
 - **Stripe**: Payment processing for priority and chargeable requests
 - **Cloudinary**: Cloud image/document storage
 - **Multer**: Memory-based multipart/form-data handling
+- **Nodemailer**: Email integration for OTPs and notifications
 - **Helmet + CORS**: API Security
 - **Vercel**: Edge/Serverless deployment
 
