@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { env } from '../../config/env';
 import { AppError } from '../../shared/AppError';
+import { sendEmail } from '../../shared/sendEmail';
 import { OAuth2Client } from 'google-auth-library';
 import {
   IRegisterPayload,
@@ -171,8 +172,11 @@ const forgotPassword = async (payload: IForgotPasswordPayload) => {
 
   await redis.set(`pwd_reset_otp:${payload.email}`, otp, 'EX', 10 * 60);
 
-  // TODO: Send email with OTP (mocked for now)
-  console.log(`[Email Mock] OTP for ${payload.email} is ${otp}`);
+  await sendEmail({
+    to: user.email,
+    subject: 'Password Reset OTP - CityFix',
+    html: `<p>Your password reset OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`,
+  });
 
   return { message: 'OTP sent to your email' };
 };

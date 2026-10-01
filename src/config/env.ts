@@ -56,6 +56,12 @@ const envSchema = z.object({
 
   PRIORITY_SLA_MULTIPLIER: z.coerce.number().default(0.5),
   PRIORITY_FEE: z.coerce.number().default(10),
+
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().email().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);
