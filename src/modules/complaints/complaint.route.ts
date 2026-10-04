@@ -32,6 +32,19 @@ router.post(
 
 router.get('/', ComplaintController.getAllComplaints);
 
+
+router.get(
+  '/stats/citizen',
+  authorize(Role.CITIZEN),
+  ComplaintController.getCitizenStats
+);
+
+router.get(
+  '/stats/staff',
+  authorize(Role.STAFF),
+  ComplaintController.getStaffStats
+);
+
 router.get('/:id', ComplaintController.getComplaintById);
 
 router.patch(

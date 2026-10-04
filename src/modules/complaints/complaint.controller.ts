@@ -95,6 +95,27 @@ const getMyAssigned = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getCitizenStats = catchAsync(async (req: Request, res: Response) => {
+  const result = await ComplaintService.getCitizenStats(req.user!.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Citizen stats retrieved successfully',
+    data: result,
+  });
+});
+
+const getStaffStats = catchAsync(async (req: Request, res: Response) => {
+  const result = await ComplaintService.getStaffStats(req.user!.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff stats retrieved successfully',
+    data: result,
+  });
+});
+
 export const ComplaintController = {
   createComplaint,
   getAllComplaints,
@@ -104,4 +125,6 @@ export const ComplaintController = {
   deleteComplaint,
   searchComplaints,
   getMyAssigned,
+  getCitizenStats,
+  getStaffStats,
 };

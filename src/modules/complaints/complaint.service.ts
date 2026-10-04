@@ -309,6 +309,134 @@ const getMyAssigned = async (staffId: string) => {
   return assignments.map((a) => a.complaint).filter((c) => c.deletedAt === null);
 };
 
+
+const getCitizenStats = async (citizenId: string) => {
+  const [
+    totalComplaints,
+    complaintsByStatus,
+    categoryCounts,
+    resolvedCount,
+    slaBreachedCount
+  ] = await Promise.all([
+    prisma.complaint.count({
+      where: { citizenId, deletedAt: null },
+    }),
+    prisma.complaint.groupBy({
+      by: ['status'],
+      _count: { status: true },
+      where: { citizenId, deletedAt: null },
+    }),
+    prisma.complaint.groupBy({
+      by: ['categoryId'],
+      _count: { categoryId: true },
+      where: { citizenId, deletedAt: null },
+    }),
+    prisma.complaint.count({
+      where: { citizenId, deletedAt: null, status: { in: ['RESOLVED', 'CLOSED'] } },
+    }),
+    prisma.complaint.count({
+      where: { citizenId, deletedAt: null, isSlaBreached: true },
+    }),
+  ]);
+
+  const categoryIds = categoryCounts.map((c) => c.categoryId);
+  const categories = await prisma.category.findMany({
+    where: { id: { in: categoryIds } },
+    select: { id: true, name: true },
+  });
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+  const byStatus: Record<string, number> = complaintsByStatus.reduce((acc, curr) => {
+    acc[curr.status] = curr._count.status;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const activeCount = (byStatus['SUBMITTED'] || 0) + (byStatus['ASSIGNED'] || 0) + (byStatus['IN_PROGRESS'] || 0);
+
+  return {
+    totalComplaints,
+    activeCount,
+    resolvedCount,
+    slaBreachedCount,
+    complaintsByStatus: byStatus,
+    complaintsByCategory: categoryCounts.map((c) => ({
+      name: categoryMap.get(c.categoryId) || 'Other',
+      value: c._count.categoryId,
+    })),
+  };
+};
+
+const getStaffStats = async (userId: string) => {
+  const assignments = await prisma.assignment.findMany({
+    where: { staffId: userId, isCurrent: true },
+    include: {
+      complaint: {
+        include: {
+          category: { select: { id: true, name: true } },
+        },
+      },
+    },
+  });
+
+  const complaints = assignments.map((a) => a.complaint).filter((c) => c.deletedAt === null);
+
+  const totalAssigned = complaints.length;
+  let inProgressCount = 0;
+  let assignedOnlyCount = 0;
+  let resolvedCount = 0;
+  let closedCount = 0;
+  let slaBreachedCount = 0;
+  const statusCounts: Record<string, number> = {};
+  const categoryCounts: Record<string, number> = {};
+
+  const now = new Date();
+  let totalResolutionHours = 0;
+  let resolvedWithTimeCount = 0;
+
+  for (const c of complaints) {
+    statusCounts[c.status] = (statusCounts[c.status] || 0) + 1;
+    const catName = c.category ? c.category.name : 'General';
+    categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
+
+    if (c.status === 'ASSIGNED') assignedOnlyCount++;
+    if (c.status === 'IN_PROGRESS') inProgressCount++;
+    if (c.status === 'RESOLVED') resolvedCount++;
+    if (c.status === 'CLOSED') closedCount++;
+
+    if (c.isSlaBreached || (c.slaDeadline && new Date(c.slaDeadline) < now && (c.status === 'ASSIGNED' || c.status === 'IN_PROGRESS'))) {
+      slaBreachedCount++;
+    }
+
+    if (c.status === 'RESOLVED' || c.status === 'CLOSED') {
+      const durationHours = (c.updatedAt.getTime() - c.createdAt.getTime()) / (1000 * 60 * 60);
+      totalResolutionHours += durationHours;
+      resolvedWithTimeCount++;
+    }
+  }
+
+  const avgResolutionHours = resolvedWithTimeCount > 0 
+    ? Math.round((totalResolutionHours / resolvedWithTimeCount) * 10) / 10 
+    : 0;
+
+  const totalCompleted = resolvedCount + closedCount;
+  const resolutionRate = totalAssigned > 0 
+    ? Math.round((totalCompleted / totalAssigned) * 100) 
+    : 0;
+
+  return {
+    totalAssigned,
+    activeQueue: assignedOnlyCount + inProgressCount,
+    assignedCount: assignedOnlyCount,
+    inProgressCount,
+    resolvedCount: totalCompleted,
+    slaBreachedCount,
+    avgResolutionHours,
+    resolutionRate,
+    complaintsByStatus: Object.entries(statusCounts).map(([name, value]) => ({ name, value })),
+    complaintsByCategory: Object.entries(categoryCounts).map(([name, value]) => ({ name, value })),
+  };
+};
+
 export const ComplaintService = {
   createComplaint,
   getAllComplaints,
@@ -318,4 +446,6 @@ export const ComplaintService = {
   deleteComplaint,
   searchComplaints,
   getMyAssigned,
+  getCitizenStats,
+  getStaffStats,
 };
