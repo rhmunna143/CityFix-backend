@@ -27,4 +27,6 @@ router.patch(
 
 router.delete('/:id', authorize(Role.ADMIN), CategoryController.deleteCategory);
 
+router.patch('/:id/restore', authorize(Role.ADMIN), CategoryController.restoreCategory);
+
 export const CategoryRoutes = router;

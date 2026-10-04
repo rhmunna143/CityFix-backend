@@ -27,4 +27,6 @@ router.patch(
 
 router.delete('/:id', authorize(Role.ADMIN), DepartmentController.deleteDepartment);
 
+router.patch('/:id/restore', authorize(Role.ADMIN), DepartmentController.restoreDepartment);
+
 export const DepartmentRoutes = router;

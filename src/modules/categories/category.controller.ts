@@ -48,9 +48,21 @@ const deleteCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const restoreCategory = catchAsync(async (req: Request, res: Response) => {
+  const result = await CategoryService.restoreCategory(req.params.id as string);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Category restored successfully',
+    data: result,
+  });
+});
+
 export const CategoryController = {
   createCategory,
   getAllCategories,
   updateCategory,
   deleteCategory,
+  restoreCategory,
 };

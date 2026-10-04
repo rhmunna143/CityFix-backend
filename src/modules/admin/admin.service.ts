@@ -129,25 +129,39 @@ const getDashboardStats = async () => {
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached);
 
-  const [totalUsers, totalDepartments, totalComplaints, complaintsByStatus, totalRevenue] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.department.count({ where: { deletedAt: null } }),
-      prisma.complaint.count({ where: { deletedAt: null } }),
-      prisma.complaint.groupBy({
-        by: ['status'],
-        _count: { status: true },
-        where: { deletedAt: null },
-      }),
-      prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: 'SUCCEEDED' },
-      }),
-    ]);
+  const [
+    totalUsers,
+    totalDepartments,
+    deletedDepartments,
+    totalCategories,
+    deletedCategories,
+    totalComplaints,
+    complaintsByStatus,
+    totalRevenue
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.department.count({ where: { deletedAt: null } }),
+    prisma.department.count({ where: { deletedAt: { not: null } } }),
+    prisma.category.count({ where: { deletedAt: null } }),
+    prisma.category.count({ where: { deletedAt: { not: null } } }),
+    prisma.complaint.count({ where: { deletedAt: null } }),
+    prisma.complaint.groupBy({
+      by: ['status'],
+      _count: { status: true },
+      where: { deletedAt: null },
+    }),
+    prisma.payment.aggregate({
+      _sum: { amount: true },
+      where: { status: 'SUCCEEDED' },
+    }),
+  ]);
 
   const stats = {
     totalUsers,
     totalDepartments,
+    deletedDepartments,
+    totalCategories,
+    deletedCategories,
     totalComplaints,
     complaintsByStatus: complaintsByStatus.reduce(
       (acc, curr) => {

@@ -56,7 +56,14 @@ const getAllCategories = async (query: Record<string, any>) => {
   const limit = Number(query.limit || 50); // Larger default limit for categories
   const skip = (page - 1) * limit;
 
-  const where = { ...catQuery.prismaQuery.where, deletedAt: null };
+  const where: any = { ...catQuery.prismaQuery.where };
+  if (query.status === 'deleted') {
+    where.deletedAt = { not: null };
+  } else if (query.status === 'all') {
+    // No filter on deletedAt
+  } else {
+    where.deletedAt = null; // Default behavior
+  }
 
   const categories = await prisma.category.findMany({
     where,
@@ -133,6 +140,7 @@ const deleteCategory = async (id: string) => {
   await prisma.category.update({
     where: { id },
     data: {
+      name: `${category.name}_DELETED_${Date.now()}`,
       isActive: false,
       deletedAt: new Date(),
     },
@@ -142,9 +150,44 @@ const deleteCategory = async (id: string) => {
   return null;
 };
 
+const restoreCategory = async (id: string) => {
+  const category = await prisma.category.findUnique({
+    where: { id },
+  });
+
+  if (!category) throw new AppError(404, 'Category not found');
+  if (!category.deletedAt) throw new AppError(400, 'Category is not in trash');
+
+  let restoredName = category.name;
+  const match = category.name.match(/^(.*)_DELETED_\d+$/);
+  
+  if (match) {
+    const originalName = match[1];
+    const existing = await prisma.category.findUnique({
+      where: { name: originalName },
+    });
+    if (!existing) {
+      restoredName = originalName;
+    }
+  }
+
+  const result = await prisma.category.update({
+    where: { id },
+    data: {
+      name: restoredName,
+      isActive: true,
+      deletedAt: null,
+    },
+  });
+
+  await invalidateCache();
+  return result;
+};
+
 export const CategoryService = {
   createCategory,
   getAllCategories,
   updateCategory,
   deleteCategory,
+  restoreCategory,
 };

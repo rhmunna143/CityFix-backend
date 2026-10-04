@@ -29,6 +29,7 @@ const getAllDepartments = async (query: Record<string, any>) => {
   const skip = (page - 1) * limit;
 
   const where: any = { ...deptQuery.prismaQuery.where };
+  delete where.status;
   if (query.status === 'deleted') {
     where.deletedAt = { not: null };
   } else if (query.status === 'all') {
