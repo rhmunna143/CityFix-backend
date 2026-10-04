@@ -17,6 +17,10 @@ const router = Router();
 
 const moduleRoutes = [
   {
+    path: '/payments',
+    route: PaymentRoutes,
+  },
+  {
     path: '/auth',
     route: AuthRoutes,
   },
@@ -45,6 +49,14 @@ const moduleRoutes = [
     route: NotificationRoutes,
   },
   {
+    path: '/admin',
+    route: AdminRoutes,
+  },
+  {
+    path: '/public',
+    route: PublicRoutes,
+  },
+  {
     path: '/',
     route: AssignmentRoutes,
   },
@@ -55,18 +67,6 @@ const moduleRoutes = [
   {
     path: '/',
     route: FeedbackRoutes,
-  },
-  {
-    path: '/payments',
-    route: PaymentRoutes,
-  },
-  {
-    path: '/admin',
-    route: AdminRoutes,
-  },
-  {
-    path: '/public',
-    route: PublicRoutes,
   },
 ];
 

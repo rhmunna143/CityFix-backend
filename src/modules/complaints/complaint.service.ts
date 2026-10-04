@@ -85,10 +85,10 @@ const getComplaintById = async (user: { id: string; role: Role }, id: string) =>
   const complaint = await prisma.complaint.findUnique({
     where: { id, deletedAt: null },
     include: {
-      category: { select: { id: true, name: true, slaHours: true } },
+      category: { select: { id: true, name: true, slaHours: true, basePrice: true } },
       department: { select: { id: true, name: true } },
       citizen: { select: { id: true, name: true, email: true, phone: true } },
-      attachments: true,
+      attachments: true, payments: true,
       statusHistories: true,
       assignments: {
         where: { isCurrent: true },

@@ -28,8 +28,14 @@ const getAllDepartments = async (query: Record<string, any>) => {
   const limit = Number(query.limit || 10);
   const skip = (page - 1) * limit;
 
-  // Enforce soft deletes
-  const where = { ...deptQuery.prismaQuery.where, deletedAt: null };
+  const where: any = { ...deptQuery.prismaQuery.where };
+  if (query.status === 'deleted') {
+    where.deletedAt = { not: null };
+  } else if (query.status === 'all') {
+    // No filter on deletedAt
+  } else {
+    where.deletedAt = null; // Default behavior
+  }
 
   const departments = await prisma.department.findMany({
     where,
@@ -90,6 +96,7 @@ const deleteDepartment = async (id: string) => {
   await prisma.department.update({
     where: { id },
     data: {
+      name: `${department.name}_DELETED_${Date.now()}`,
       isActive: false,
       deletedAt: new Date(),
     },
@@ -98,9 +105,43 @@ const deleteDepartment = async (id: string) => {
   return null;
 };
 
+const restoreDepartment = async (id: string) => {
+  const department = await prisma.department.findUnique({
+    where: { id },
+  });
+
+  if (!department) throw new AppError(404, 'Department not found');
+  if (!department.deletedAt) throw new AppError(400, 'Department is not in trash');
+
+  let restoredName = department.name;
+  const match = department.name.match(/^(.*)_DELETED_\d+$/);
+  
+  if (match) {
+    const originalName = match[1];
+    const existing = await prisma.department.findUnique({
+      where: { name: originalName },
+    });
+    if (!existing) {
+      restoredName = originalName;
+    }
+  }
+
+  const result = await prisma.department.update({
+    where: { id },
+    data: {
+      name: restoredName,
+      isActive: true,
+      deletedAt: null,
+    },
+  });
+
+  return result;
+};
+
 export const DepartmentService = {
   createDepartment,
   getAllDepartments,
   updateDepartment,
   deleteDepartment,
+  restoreDepartment,
 };
