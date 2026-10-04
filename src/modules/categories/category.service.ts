@@ -36,7 +36,7 @@ const createCategory = async (payload: ICreateCategoryPayload) => {
 };
 
 const getAllCategories = async (query: Record<string, any>) => {
-  const isCacheable = !query.page && !query.limit && !query.departmentId;
+  const isCacheable = !query.page && !query.limit && !query.departmentId && (!query.status || query.status === 'active');
 
   if (isCacheable) {
     const cached = await redis.get(CACHE_KEY);
@@ -57,6 +57,7 @@ const getAllCategories = async (query: Record<string, any>) => {
   const skip = (page - 1) * limit;
 
   const where: any = { ...catQuery.prismaQuery.where };
+  delete where.status;
   if (query.status === 'deleted') {
     where.deletedAt = { not: null };
   } else if (query.status === 'all') {
